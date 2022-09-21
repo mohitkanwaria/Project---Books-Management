@@ -1,10 +1,11 @@
 
 
-const isValidName = function (name) {
-    if (typeof name === "undefined" || name === null) return false;
-    if (typeof name === "string" && name.trim().length > 0) return true;
+const isValid = function (value) {
+    if (typeof value === "undefined" || value === null) return false;
+    if (typeof value === "string" && value.trim().length > 0) return true;
     return false;
   };
+
 
   const isValidTitle = function (title) {
     return ["Mr", "Mrs", "Miss"].includes(title);
@@ -35,14 +36,19 @@ const isValidPassword = function (password) {
     if (/^[a-zA-Z0-9!@#$%^&*]{8,15}$/.test(password)) return true
 }
 
+let isValidISBN=function(value){
+  return /^[6-9]{3}\-([\d]{10})$/.test(value)
+}
+
 
 module.exports ={
-    isValidName, 
+    isValid, 
     isValidTitle,
     isValidRequestBody,
     isValidMobile,
     isValidEmail,
     regixValidator,
     isValidPincode,
-    isValidPassword
+    isValidPassword,
+    isValidISBN
 }
