@@ -89,7 +89,8 @@ const getByBookId = async function (req, res) {
 
 
 const createBook = async function(req, res){
-try{    let data = req.body
+try{    
+     let data = req.body
      let {title,excerpt,userId,ISBN,category,subcategory,reviews,deletedAt, isDeleted, releasedAt}=data
 
 //-----------------------------------------------------------------------------------------

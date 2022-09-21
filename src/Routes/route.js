@@ -14,7 +14,7 @@ router.post('/books',mid.authentication, bookController.createBook)
 
 
 
-router.get('/books', bookController.allBooks)
-router.get('/books/:bookId', bookController.getByBookId)
+router.get('/books',mid.authentication, bookController.allBooks)
+router.get('/books/:bookId',mid.authentication, bookController.getByBookId)
 
 module.exports = router;
