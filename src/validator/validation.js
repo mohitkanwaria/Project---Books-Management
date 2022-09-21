@@ -36,6 +36,10 @@ const isValidPassword = function (password) {
     if (/^[a-zA-Z0-9!@#$%^&*]{8,15}$/.test(password)) return true
 }
 
+let isValidISBN=function(value){
+  return /^[6-9]{3}\-([\d]{10})$/.test(value)
+}
+
 
 module.exports ={
     isValid, 
@@ -45,5 +49,6 @@ module.exports ={
     isValidEmail,
     regixValidator,
     isValidPincode,
-    isValidPassword
+    isValidPassword,
+    isValidISBN
 }
