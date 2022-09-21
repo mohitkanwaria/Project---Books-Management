@@ -1,6 +1,4 @@
-
 const bookModel = require('../Models/BooksModel')
-const { findById } = require('../Models/UserModel')
 const UserModel = require('../Models/UserModel')
 const validation = require('../validator/validation')
 // const bookModel = require("../Models/BooksModel")
@@ -89,18 +87,6 @@ const getByBookId = async function (req, res) {
 }
 
 
-module.exports.allBooks = allBooks
-module.exports.getByBookId = getByBookId
-
-
-
-
-
-
-
-
-
-
 
 const createBook = async function(req, res){
 try{    let data = req.body
@@ -165,3 +151,5 @@ try{    let data = req.body
 
 
 module.exports.createBook=createBook
+module.exports.allBooks = allBooks
+module.exports.getByBookId = getByBookId
