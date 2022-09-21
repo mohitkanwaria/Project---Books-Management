@@ -1,10 +1,11 @@
 
 
-const isValidName = function (name) {
-    if (typeof name === "undefined" || name === null) return false;
-    if (typeof name === "string" && name.trim().length > 0) return true;
+const isValid = function (value) {
+    if (typeof value === "undefined" || value === null) return false;
+    if (typeof value === "string" && value.trim().length > 0) return true;
     return false;
   };
+
 
   const isValidTitle = function (title) {
     return ["Mr", "Mrs", "Miss"].includes(title);
@@ -37,7 +38,7 @@ const isValidPassword = function (password) {
 
 
 module.exports ={
-    isValidName, 
+    isValid, 
     isValidTitle,
     isValidRequestBody,
     isValidMobile,

@@ -25,7 +25,7 @@ try{
           .send({ status: false, message: "Title is required" });
       }
 
-      if (!validation.isValidName(name)) {
+      if (!validation.isValid(name)) {
         return res.status(400).send({
           status: false,
           message:
