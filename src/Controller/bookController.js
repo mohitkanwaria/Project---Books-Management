@@ -5,7 +5,7 @@ const validation = require('../validator/validation')
 
 
 const createBook = async function(req, res){
-    let data = req.body
+try{    let data = req.body
      let {title,excerpt,userId,ISBN,category,subcategory,reviews,deletedAt, isDeleted, releasedAt}=data
 
 //-----------------------------------------------------------------------------------------
@@ -60,7 +60,9 @@ const createBook = async function(req, res){
 //------------------------BOOK Creation------------------------------------
     const bookCreate = await bookModel.create(data)
     res.status(201).send({status:true, message:'',data:bookCreate})
-
+}catch(err){
+    res.status(500).send({status:false,message:err.message})
+}
 }
 
 
