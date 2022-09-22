@@ -11,7 +11,7 @@ const authentication = async (req, res, next) => {
         try{
             let decodedToken = jwt.verify(token,"BookManagementProject3"); 
        
-             req.decodedToken=decodedToken;
+             req["x-api-key"]=decodedToken;
            }
            catch(err){
             return res.status(401).send({status:false,data: err.message, message:"Token invalid hai"})
@@ -29,16 +29,17 @@ const authorization = async function (req, res, next)  {
     try {
         
         let bookId=req.params.bookId
-        const decodedToken=req.decodedToken
-        console.log(decodedToken);
+        const decodedToken=req["x-api-key"]
+        
 
-        let bookById=await bookModel.findById({_id:bookId,isDeleted:false})
-        console.log(bookById)
+        let bookById=await bookModel.findOne({_id:bookId,isDeleted:false})
+      
 
-        if(decodedToken.userId !=bookById.userId.toString()){
+        if(decodedToken.loginId !== bookById.userId.toString()){
             
             return res.status(403).send({status:false,message:"you are Unauthorized for this"})
         }
+        else
         next();
      
     } catch (error) {
