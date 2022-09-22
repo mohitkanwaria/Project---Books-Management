@@ -150,7 +150,35 @@ try{
 }
 }
 
+//==============================delete by BookId=============================================
+
+const deleteByBook = async function(req, res){
+    
+try{    
+    let bookId = req.params.bookId
+    if(!bookId)
+    return res.status(400).send({status:false, message:'BookId is required'})
+
+    if (!bookId.match(/^[0-9a-fA-F]{24}$/))
+    return res.status(400).send({ status: false, msg: "invalid bookId given" })
+
+   if(await bookModel.findOneAndUpdate({_id:bookId, isDeleted:false},{$set:{isDeleted:true, deletedAt: Date.now()}},{ new:true})){
+
+    return res.status(200).send({status:true, message:'successfully Deleted'})
+   }
+    
+    return res.status(400).send({status:false, message:'Book is already deleted from Database'})
+    
+    
+
+}catch(err){
+    res.status(500).send({status:false, message:err.message})
+}
+
+}
+
 
 module.exports.createBook=createBook
 module.exports.allBooks = allBooks
 module.exports.getByBookId = getByBookId
+module.exports.deleteByBook = deleteByBook
