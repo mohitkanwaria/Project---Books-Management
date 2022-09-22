@@ -1,7 +1,7 @@
 const bookModel = require('../Models/BooksModel')
 const UserModel = require('../Models/UserModel')
 const validation = require('../validator/validation')
-
+// const bookModel = require("../Models/BooksModel")
 
 const allBooks = async function (req, res) {
     try {
@@ -171,8 +171,8 @@ try{
 
     return res.status(200).send({status:true, message:'successfully Deleted'})
    }
-    //if isDeleted is true
-    return res.status(400).send({status:false, message:'Book is already deleted from Database'})
+    //if isDeleted is true and no book found
+    return res.status(400).send({status:false, message:'book not found or already deleted'})
     
     
 
