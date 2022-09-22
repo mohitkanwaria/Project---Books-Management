@@ -41,7 +41,7 @@ const bookSchema = new mongoose.Schema({
     unique: true
   },
   category: { type: String, required: true },
-  subcategory: { type: [String], required: true },
+  subcategory: { type: String, required: true },
   reviews: {
     type: Number,
     default: 0,

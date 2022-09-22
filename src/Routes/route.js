@@ -2,7 +2,6 @@ const express  = require("express")
 const router =express.Router()
 const userController =require("../Controller/userController")
 const bookController = require("../Controller/bookController")
-const bookController =require("../Controller/bookController")
 const mid =require('../middlewares/auths')
 // const blogController =require("../Controller/blogController")
 // const middleware = require('../middleWare/auth')
@@ -15,7 +14,7 @@ router.post('/books',mid.authentication, bookController.createBook)
 
 
 
-router.get('/books', bookController.allBooks)
-router.get('/books/:bookId', bookController.getByBookId)
+router.get('/books',mid.authentication, bookController.allBooks)
+router.get('/books/:bookId',mid.authentication, bookController.getByBookId)
 
 module.exports = router;
