@@ -151,6 +151,84 @@ try{
 }
 
 
+//============updateBook=======
+
+const updateBook = async function(req, res){
+    
+    try {
+        //get the bookId
+        let bookId = req.params.bookId
+        //find the book with bookId
+        let book = await bookModel.findById(bookId)
+
+        //check for book not presetn and isDelete true - book not available
+        if(!book || book.isDeleted == true){
+            return res.status(404).send({
+                status : false,
+                message : "Book not found in db or it is deleted"
+            })
+        }
+
+        //updating 
+        //checking for requestBody
+        const requestBody = req.body
+        if(!validation.isValidRequestBody(requestBody)){
+            return res.send(400).send({
+                status : false,
+                message : "Please provide the Upadate details"
+            })
+        }
+
+        //checking for update details - title
+        //ckeck for uniqueness of title
+        if(requestBody.title){
+            if(validation.isValid(requestBody.title)){
+                book.title = requestBody.title.trim()
+            } else {
+                return res.status(400).send({
+                    status : false,
+                    message : "Title required"
+                })
+            }
+        }
+        //checking for update details - excerpt
+        if(requestBody.excerpt){
+            if(validation.isValid(requestBody.excerpt)){
+                book.excerpt = requestBody.excerpt.trim()
+            } else {
+                return res.status(400).send({
+                    status : false,
+                    message : "excerpt required"
+                })
+            }
+        }
+
+        //checking for update details - ISBN
+        //check for unique ISBN
+        if(requestBody.ISBN){
+            if(validation.isValidISBN(requestBody.ISBN)){
+                book.ISBN = requestBody.ISBN
+            } else {
+                return res.status(400).send({
+                    status : false,
+                    message : "ISBN required"
+                })
+            }
+        }
+
+        //checking for upade details - releasedAt
+        book.releasedAt = requestBody.releasedAt
+
+        //updating the book
+        let updatedBook = await bookModel.findOneAndUpdate({ _id : bookId }, book, {new : true})
+        return res
+            .status(200)
+            .send({ status: true, message: "successfully updated", data: updatedBook })
+
+    } catch (error) {
+        return res.status(500).send({ message: err.message })
+    }
+}
 
 
 
@@ -160,8 +238,7 @@ try{
 
 
 
-
-
+module.exports.updateBook = updateBook
 module.exports.createBook=createBook
 module.exports.allBooks = allBooks
 module.exports.getByBookId = getByBookId
