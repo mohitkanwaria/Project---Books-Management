@@ -24,8 +24,13 @@ const allBooks = async function (req, res) {
         let { userId, category, subcategory } = req.query
 
         let query = { isDeleted: false }
+ 
+        //validating the userID and if valid then sending to query object
+        if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).send({ status: false, msg: "invalid userId given" })
+        } else if (userId != null) query.userId = userId;
 
-        if (userId != null) query.userId = userId;
+        
         if (category != null) query.category = category;
         if (subcategory != null) query.subcategory = subcategory;
 
@@ -36,12 +41,15 @@ const allBooks = async function (req, res) {
                 status: false,
                 message: "No book found"
             })
-        } else if (Object.keys(query).length === 0) {
+        } 
+        // if nothing is given in query
+        else if (Object.keys(query).length === 0) {
             return res.status(200).send({
                 status: true,
                 data: returnBook
             })
         } else {
+            //filtering the book as per the query and getting the data in finalFilter
             let finalFilter = await bookModel.find(query)
             return res.status(200).send({ status: true, data: finalFilter })
 

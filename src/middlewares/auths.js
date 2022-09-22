@@ -31,7 +31,7 @@ const authorization = async function (req, res, next)  {
         
         let book = await BookModel.findById(id)
         if (!book) {
-            return res.status(404).send({status:false,message:"blog is not found given id"})
+            return res.status(404).send({status:false,message:"book is not found with this given id"})
         }
         let userId=book.userId
         let token = req.headers['x-api-key']
