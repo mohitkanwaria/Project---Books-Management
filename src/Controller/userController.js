@@ -85,6 +85,7 @@ const createUser = async function (req, res) {
 
     let createNew = await userModel.create(user)
     res.status(201).send({ status: true, message: 'Success', data: createNew })
+
   } catch (err) {
     res.status(500).send({ status: false, message: err.message })
   }
@@ -147,7 +148,7 @@ const userLogin = async function (req, res) {
         iat: Date.now()  //issueAt
       },
       "BookManagementProject3",
-      { expiresIn: "120s" }
+      { expiresIn: "24h" }
     );
     let jwtToken = { token: token, userId: loginUser._id, iat: Date.now(), exp: new Date(Date.now()) }
 
