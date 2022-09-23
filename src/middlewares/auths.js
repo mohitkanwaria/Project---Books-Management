@@ -31,9 +31,11 @@ const authorization = async function (req, res, next)  {
         let bookId=req.params.bookId
         const decodedToken=req["x-api-key"]
         
-        let book = await BookModel.findById(id)
-        if (!book) {
-            return res.status(404).send({status:false,message:"book is not found with this given id"})
+        let bookById = await bookModel.findOne({_id:bookId, isDeleted:false})
+        
+        if(decodedToken.loginId !== bookById.userId.toString()){
+
+            return res.status(403).send({status:false,message:"you are Unauthorized for this"})
         }
         else
         next();
