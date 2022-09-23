@@ -24,6 +24,8 @@ router.delete('/books/:bookId', mid.authentication, mid.authorization, bookContr
 //review controller
 router.delete('/books/:bookId/review/:reviewId',reviewController.deleteReview)
 
+router.put('/books/:bookId/review/:reviewId', reviewController.updateReview)
+
 //handling for api route
 router.all("/**", (req, res) => {
     try{
