@@ -10,9 +10,12 @@ router.post('/login', userController.userLogin)
 router.post('/books',mid.authentication, bookController.createBook)
 
 
-
+//get details book
 router.get('/books',mid.authentication, bookController.allBooks)
 router.get('/books/:bookId', mid.authentication, bookController.getByBookId)
+
+//update book by id
+router.put('/books/:bookId',mid.authentication, mid.authorization, bookController.updateBook)
 
 //delete by bookId
 router.delete('/books/:bookId', mid.authentication, mid.authorization, bookController.deleteByBook)
@@ -26,5 +29,5 @@ router.all("/**", (req, res) => {
     }
 })
 
-router.put('/books/:bookId',mid.authentication, mid.authorization, bookController.updateBook)
+
 module.exports = router;

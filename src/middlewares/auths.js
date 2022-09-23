@@ -6,7 +6,7 @@ const authentication = async (req, res, next) => {
     try {
         let token = req.headers['x-api-key']
         if (!token) {
-            return res.status(400).send({ status: false, message: "Header hona chahiye !" })
+            return res.status(400).send({ status: false, message: "Token hona chahiye !" })
         }
         try{
             let decodedToken = jwt.verify(token,"BookManagementProject3"); 
@@ -32,7 +32,7 @@ const authorization = async function (req, res, next)  {
         const decodedToken=req["x-api-key"]
         
         let bookById = await bookModel.findOne({_id:bookId, isDeleted:false})
-        
+
         if(decodedToken.loginId !== bookById.userId.toString()){
 
             return res.status(403).send({status:false,message:"you are Unauthorized for this"})

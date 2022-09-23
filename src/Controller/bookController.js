@@ -1,6 +1,7 @@
 const bookModel = require('../Models/BooksModel')
 const UserModel = require('../Models/UserModel')
 const validation = require('../validator/validation')
+const reviewModel = require('../Models/ReviewModel')
 // const bookModel = require("../Models/BooksModel")
 
 const allBooks = async function (req, res) {
@@ -26,11 +27,22 @@ const allBooks = async function (req, res) {
         let query = { isDeleted: false }
  
         //validating the userID and if valid then sending to query object
-        if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
-            return res.status(400).send({ status: false, msg: "invalid userId given" })
-        } else if (userId != null) query.userId = userId;
+        // if (userId != null) query.userId = userId
+        // if (!userId.match(/^[0-9a-fA-F]{24}$/))
+        // res.status(400).send({ status: false, msg: "invalid userId given" })
 
-        
+        //checking for valid query
+        let comp =['userId', 'category', 'subcategory']
+        if (!Object.keys(req.query).every(elem => comp.includes(elem)))
+        return res.status(400).send({ status: false, msg: "wrong query given" });
+
+
+        if(userId){
+            if(!userId.match(/^[0-9a-fA-F]{24}$/)){
+               return res.status(400).send({ status: false, msg: "invalid userId given" })
+            }
+        }
+
         if (category != null) query.category = category;
         if (subcategory != null) query.subcategory = subcategory;
 
@@ -289,6 +301,34 @@ const updateBook = async function (req, res) {
     }
 }
 
+
+
+const createReview = async function(req, res){
+    let data = req.body
+    let {bookId, reviewedBy, reviewedAt, rating, review, isDeleted} = data
+    
+    //if entries are empty
+    if (!validation.isValidRequestBody(data)) {
+        return res.status(400).send({
+            status: false,
+            message: "Invalid request parameter, please provide User Details",
+        })
+    }
+
+    //checking for bookId
+    if(!bookId)
+    return res.status(400).send({status:false, message:'bookId is required'})
+
+    if (!bookId.match(/^[0-9a-fA-F]{24}$/))
+    return res.status(400).send({ status: false, msg: "invalid bookId given" })
+
+    if(!await bookModel.findOne({_id:bookId, isDeleted:false}))
+    return res.status(404).send({status:false, message:'Please enter valid bookId'})
+
+
+    let newReview = await reviewModel.create(data)
+    return res.status(201).send({status:true, message:'successfully review created', data:newReview})
+}
 
 
 
