@@ -123,7 +123,7 @@
 - Return the updated book document with reviews data on successful operation. The response body should be in the form of JSON object like [this](#book-details-response)
 
 ### DELETE /books/:bookId/review/:reviewId
-- Check if the review exist with the reviewId. Check if the book exist with the bookId. Send an error response with appropirate status code like [this](#error-response-structure) if the book or book review does not exist
+- Check if the review exist with the reviewId. Check if the book exist with the bookId. Send an error response with appropirate status code like [this](#error-response-structure) if the book or book review does not exist.
 - Delete the related reivew.
 - Update the books document - decrease review count by one
 
