@@ -13,7 +13,7 @@ Send an error response with appropirate status code like [this](#error-response-
 - Return the updated book document with reviews data on successful operation. 
 The response body should be in the form of JSON object like [this](#successful-response-structure)
 */
-
+//==================================================create review=======================================
 const createReview = async function(req, res){
  try{   
     let data = req.body
@@ -50,7 +50,7 @@ const createReview = async function(req, res){
     return res.status(400).send({status:false, message:'Book not found'})
 
     //regex for rating
-    if(!/[1-5]/.test(data.rating))
+    if(!data.rating || !/[1-5]/.test(data.rating))
     return res.status(400).send({status:false, message:'rating is required and should be in the range of 1-5'})
 
     //finding book and updating review
@@ -69,16 +69,27 @@ const createReview = async function(req, res){
     return res.status(500).send({status:false, message:err.message})
 }
 }
+
+
+//==============================delete review========================================
 let deleteReview = async function (req,res){
     try{
         let reviewId =req.params.reviewId
         let bookId =req.params.bookId
 
-        let deletereview = await reviewModel.findOneAndUpdate({_id:reviewId, bookId:bookId},{$set:{isDeleted:true, $inc: {review: -1}}})
+        const bookDetails = await bookModel.findOneAndUpdate({ _id: bookId },{ $inc: { reviews: -1 } },{ new: true })
 
-        res.status(200).send({status:true,message: "review deleted successfully"})
+        const reviewDetails = await reviewModel.findOne({_id: reviewId, bookId:bookDetails._id.toString()})
+        if (!reviewDetails || reviewDetails.isDeleted===true){
 
-    }catch(error) {
+            return res.status(404).send({status: false, message: "Review not found or Deleted"});
+        }else{
+            reviewDetails.isDeleted = true;
+            reviewDetails.save();
+            return res.status(200).send({ status: true, message: "The review is deleted" });
+        }
+
+}catch(error) {
         return res.status(500).send({ message: error.message })
     }
 }
@@ -155,6 +166,8 @@ let deleteReview = async function (req,res){
         if(review != null) filterUpdate.review = review
         if(rating != null) filterUpdate.rating = rating;
         if(reviewedBy != null) filterUpdate.reviewedBy = reviewedBy;
+
+        filterUpdate.reviewData=reviewData
 
         //updating the filterUpdate in the reviewModel and sending finalUpdate in response
         const finalUpdate = await reviewModel.findOneAndUpdate({_id : reviewId}, filterUpdate, {new : true})
