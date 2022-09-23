@@ -33,8 +33,4 @@ router.all("/**", (req, res) => {
     }
 })
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 5eafb43db7c9c00bb0f0ceab4747548de1cb4a4c
 module.exports = router;
