@@ -3,67 +3,48 @@ const bookModel = require("../Models/BooksModel")
 const validation = require("../validator/validation")
 
 
-
-/*
-- Add a review for the book in reviews collection.
-- Check if the bookId exists and is not deleted before adding the review. 
-Send an error response with appropirate status code like [this](#error-response-structure) if the book does not exist
-- Get review details like review, rating, reviewer's name in request body.
-- Update the related book document by increasing its review count
-- Return the updated book document with reviews data on successful operation. 
-The response body should be in the form of JSON object like [this](#successful-response-structure)
-*/
 //==================================================create review=======================================
 const createReview = async function(req, res){
  try{   
-    let data = req.body
-    let bookId = req.params.bookId
-    // let {reviewedBy, rating, review} = data
+        let data = req.body
+        let bookId = req.params.bookId
 
-      //if entries are empty
-      if (!validation.isValidRequestBody(data)) {
-        return res.status(400).send({
-            status: false,
-            message: "Invalid request parameter, please provide User Details",
-        })
-    }
+        //if entries are empty
+        if (!validation.isValidRequestBody(data)) 
+        return res.status(400).send({status: false, message: "Invalid request parameter, please provide User Details"})
+
+        
+        //if bookId not present take bookId from bookModel
+        if (!data.bookId) data.bookId = bookId;
+        if (!data.reviewedBy) data.reviewedBy = "Guest";
+        if (!data.reviewedAt) data.reviewedAt = new Date;
+
+        //checking for bookId
+        if(!bookId)
+        return res.status(400).send({status:false, message:'bookId is required'})
     
-    let checkBook = await bookModel.findOne({_id:bookId,isDeleted:false})
-   
-    //if bookId not present take bookId from bookModel
-    if (!data.bookId) data.bookId = checkBook._id;
-    if (!data.reviewedBy) data.reviewedBy = "Guest";
-    if (!data.reviewedAt) data.reviewedAt = new Date;
-    
+        if (!bookId.match(/^[0-9a-fA-F]{24}$/))
+        return res.status(400).send({ status: false, msg: "invalid bookId given" })
 
-    //creating review
-    const newreview = await reviewModel.create(data);
+        //regex for rating
+        if(!data.rating || !/^[1-5]\d*$/.test(data.rating))
+        return res.status(400).send({status:false, message:'rating is required and should be in the range of 1-5'})
+        
 
-    //checking for bookId
-    if(!bookId)
-    return res.status(400).send({status:false, message:'bookId is required'})
+        //creating review
+        const newreview = await reviewModel.create(data);
 
-    if (!bookId.match(/^[0-9a-fA-F]{24}$/))
-    return res.status(400).send({ status: false, msg: "invalid bookId given" })
+        //finding book and updating review
+        const updatebookReview = await bookModel.findOneAndUpdate({ _id: data.bookId,isDeleted:false}, { $inc: { reviews: +1 } }, { new: true }).lean()
 
-    if(!checkBook)
-    return res.status(400).send({status:false, message:'Book not found'})
+        //if isDeleted is true
+        if (!updatebookReview)
+        res.status(200).send({ status: true, message: "Book not found or book is already deleted" });
 
-    //regex for rating
-    if(!data.rating || !/[1-5]/.test(data.rating))
-    return res.status(400).send({status:false, message:'rating is required and should be in the range of 1-5'})
+        //taking all newreview
+        updatebookReview.reviewsdata = newreview;
 
-    //finding book and updating review
-    const updatebookReview = await bookModel.findOneAndUpdate({ _id: data.bookId }, { $inc: { reviews: +1 } }, { new: true })
-
-    //if isDeleted is true
-    if (updatebookReview.isDeleted == true)
-    res.status(200).send({ status: true, message: "the book is already deleted" });
-
-    //taking all newreview
-    updatebookReview.reviewsdata = newreview;
-
-    return res.status(200).send({ status: true, message: "Success", data: updatebookReview })
+        return res.status(200).send({ status: true, message: "Success", data: updatebookReview })
    
 }catch(err){
     return res.status(500).send({status:false, message:err.message})
