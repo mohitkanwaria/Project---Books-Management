@@ -26,6 +26,8 @@ router.delete('/books/:bookId/review/:reviewId',reviewController.deleteReview)
 
 router.put('/books/:bookId/review/:reviewId', reviewController.updateReview)
 
+router.post('/books/:bookId/review', reviewController.createReview)
+
 //handling for api route
 router.all("/**", (req, res) => {
     try{
