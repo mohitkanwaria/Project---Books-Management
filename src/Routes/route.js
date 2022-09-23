@@ -3,19 +3,24 @@ const router =express.Router()
 const userController =require("../Controller/userController")
 const bookController = require("../Controller/bookController")
 const mid =require('../middlewares/auths')
+const reviewController =require('../Controller/reviewController')
 
 router.post('/register', userController.createUser)
 router.post('/login', userController.userLogin)
 
 router.post('/books',mid.authentication, bookController.createBook)
 
-
-
 router.get('/books',mid.authentication, bookController.allBooks)
 router.get('/books/:bookId', mid.authentication, bookController.getByBookId)
 
+router.put('/books/:bookId',mid.authentication, mid.authorization, bookController.updateBook)
+
+
 //delete by bookId
 router.delete('/books/:bookId', mid.authentication, mid.authorization, bookController.deleteByBook)
+
+//review controller
+router.delete('/books/:bookId/review/:reviewId',reviewController.deleteReview)
 
 //handling for api route
 router.all("/**", (req, res) => {
@@ -26,5 +31,4 @@ router.all("/**", (req, res) => {
     }
 })
 
-router.put('/books/:bookId',mid.authentication, mid.authorization, bookController.updateBook)
 module.exports = router;
