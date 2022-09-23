@@ -15,6 +15,7 @@ The response body should be in the form of JSON object like [this](#successful-r
 */
 
 const createReview = async function(req, res){
+ try{   
     let data = req.body
     let bookId = req.params.bookId
     // let {reviewedBy, rating, review} = data
@@ -35,6 +36,9 @@ const createReview = async function(req, res){
     if (!data.reviewedAt) data.reviewedAt = new Date;
     
 
+    //creating review
+    const newreview = await reviewModel.create(data);
+
     //checking for bookId
     if(!bookId)
     return res.status(400).send({status:false, message:'bookId is required'})
@@ -43,24 +47,28 @@ const createReview = async function(req, res){
     return res.status(400).send({ status: false, msg: "invalid bookId given" })
 
     if(!checkBook)
-    return res.status(400).send({status:false, message:''})
+    return res.status(400).send({status:false, message:'Book not found'})
 
+    //regex for rating
     if(!/[1-5]/.test(data.rating))
     return res.status(400).send({status:false, message:'rating is required and should be in the range of 1-5'})
 
+    //finding book and updating review
     const updatebookReview = await bookModel.findOneAndUpdate({ _id: data.bookId }, { $inc: { reviews: +1 } }, { new: true })
 
-    const newreview = await reviewModel.create(data);
-
+    //if isDeleted is true
     if (updatebookReview.isDeleted == true)
-    res.status(201).send({ status: true, message: "the book is already deleted" });
+    res.status(200).send({ status: true, message: "the book is already deleted" });
 
+    //taking all newreview
     updatebookReview.reviewsdata = newreview;
 
-    return res.status(201).send({ status: true, message: "Success", data: updatebookReview })
+    return res.status(200).send({ status: true, message: "Success", data: updatebookReview })
    
+}catch(err){
+    return res.status(500).send({status:false, message:err.message})
 }
-
+}
 let deleteReview = async function (req,res){
     try{
         let reviewId =req.params.reviewId

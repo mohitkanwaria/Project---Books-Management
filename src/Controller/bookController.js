@@ -1,7 +1,6 @@
 const bookModel = require('../Models/BooksModel')
 const UserModel = require('../Models/UserModel')
 const validation = require('../validator/validation')
-const reviewModel = require('../Models/ReviewModel')
 // const bookModel = require("../Models/BooksModel")
 
 const allBooks = async function (req, res) {
