@@ -14,7 +14,7 @@ router.post('/register', userController.createUser)
 router.post('/login', userController.userLogin)
 
 //creating book for authenticate user
-router.post('/books',mid.authentication, bookController.createBook)
+router.post('/books',mid.authentication, mid.authorization, bookController.createBook)
 
 //----------------------------step 2----------------------------------------
 //get details book by using query for authenticate user

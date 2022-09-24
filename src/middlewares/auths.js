@@ -8,42 +8,63 @@ const authentication = async (req, res, next) => {
         if (!token) {
             return res.status(400).send({ status: false, message: "Token hona chahiye !" })
         }
-        try{
-            const decodedToken = jwt.verify(token,"BookManagementProject3"); 
+            decodedToken = jwt.verify(token,"BookManagementProject3", (error, response)=>{
+                if(error){
+                    return res.status(401).send({status:false, message:"Token invalid hai"})
+                }
+                req.headers["userId"]=response.userId 
+                next()  
+            }); 
        
-             req["x-api-key"]=decodedToken;
-           }
-           catch(err){
-            return res.status(401).send({status:false,data: err.message, message:"Token invalid hai"})
-        }
-        next()
-    }catch (err) {
-        
-         return res.status(500).send({  status: false, message: err.message });
+         }catch (err) {
+             return res.status(500).send({status: false, message: err.message});
+    }
       }
-}
 
 
+      const authorization = async function(req,res,next){
 
-const authorization = async function (req, res, next)  {
-    try {
+        try{
+        const user_id = req.headers['userId']
+        const bodyId = req.body.userId
+        const bookId = req.params.bookId
         
-        const bookId=req.params.bookId
-        const decodedToken=req["x-api-key"]
-        
-        const bookById = await bookModel.findOne({_id:bookId, isDeleted:false})
 
-        if(decodedToken.loginId !== bookById.userId.toString()){
-
-            return res.status(403).send({status:false,message:"you are Unauthorized for this"})
+        //bookById for update and delete book by Id
+        if(bookId)
+        {
+            if(!(bookId.match(/^[0-9a-fA-F]{24}$/)))
+            return res.status(400).send({status:false,message:"Invalid bookId given"})
+            
+            const book = await bookModel.findOne({_id:bookId,isDeleted:false})
+            
+            if(!book)
+            return res.status(404).send({status:false,message:"Book not found"})
+    
+            if(user_id != book.userId)
+            return res.status(403).send({status:false,message:"Unauthorised access"})
+    
+        }
+        //for creating book
+        else if(bodyId)
+        {   
+            if(!isValid.isValidId(bodyId))
+            return res.status(400).send({status:false,message:"Invalid userId given"})
+            
+            if(id!=bodyId)
+            return res.status(403).send({status:false,message:"Unauthorised access"})
         }
         else
-        next();
-     
-    } catch (error) {
-        return res.status(500).send({status:true, message: error.message })
+        return res.status(400).send({status:false,message:"No Id given"})
+    
+        next()
+    
+    
+        }
+        catch(error){
+        return res.status(500).send({  status: false, message: error.message });
+        }
     }
-}
 
 
 module.exports.authentication=authentication

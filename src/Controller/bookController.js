@@ -1,7 +1,8 @@
 const bookModel = require('../Models/BooksModel')
 const UserModel = require('../Models/UserModel')
+const reviewModel = require('../Models/ReviewModel')
 const validation = require('../validator/validation')
-// const bookModel = require("../Models/BooksModel")
+
 
 
 //=========================================creating book===================================================
@@ -37,8 +38,7 @@ const createBook = async function (req, res) {
             })
         }
 
-        
-        //------------------------ISBN validation-------------------------------------------
+      //------------------------ISBN validation-------------------------------------------
         if (!validation.isValid(ISBN))
             return res.status(400).send({ status: false, message: 'ISBN is required' })
         
@@ -177,7 +177,7 @@ const allBooks = async function (req, res) {
         // alphabetically sorting the title
         let sortedData = findbook.sort(function (a, b){
             if(a.title < b.title) { return -1 }
-            if(a.title > b.title) { return 1 }
+            // if(a.title > b.title) { return 1 }
         })
 
         return res.status(200).send({
@@ -200,7 +200,10 @@ const getByBookId = async function (req, res) {
         //extract the bookId 
         const bookId = req.params.bookId
         //find the book with the bookId in bookModel
-        const book = await bookModel.findById(bookId)
+        const book = await bookModel.findById(bookId).lean()
+
+        //find all reviews with the prticular book_id
+        const reviewData = await reviewModel.find({bookId:bookId,isDeleted:false}).select({isDeleted:0,createdAt:0,updatedAt:0,__v:0})
 
         //if book not found or isDeleted is true then we can say book not found
         if (!book || book.isDeleted === true) {
@@ -209,6 +212,7 @@ const getByBookId = async function (req, res) {
                 message: "Book not found"
             })
         } else {
+            book.reviewsData = reviewData
             return res.status(200).send({
                 status: true,
                 data: book
@@ -233,24 +237,11 @@ try{
     //bookId    
     const bookId = req.params.bookId
 
-    //if bookId is not present
-    if(!bookId)
-    return res.status(400).send({status:false, message:'BookId is required'})
-
-    //for invalid bookId 
-    if (!bookId.match(/^[0-9a-fA-F]{24}$/))
-    return res.status(400).send({ status: false, msg: "invalid bookId given" })
-
     //for checking bookId and isDeleted false and set isDeleted to true
-   if(await bookModel.findOneAndUpdate({_id:bookId, isDeleted:false},{$set:{isDeleted:true, deletedAt: Date.now()}},{ new:true})){
+   const bookDeleted=await bookModel.findOneAndUpdate({_id:bookId, isDeleted:false},{$set:{isDeleted:true, deletedAt: Date.now()}},{ new:true})
 
-    return res.status(200).send({status:true, message:'successfully Deleted'})
-   }
-    //if isDeleted is true and no book found
-    return res.status(400).send({status:false, message:'book not found or already deleted'})
+   return res.status(200).send({status:true, message:'successfully Deleted'})
     
-    
-
 }catch(err){
     res.status(500).send({status:false, message:err.message})
 }

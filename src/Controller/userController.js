@@ -130,7 +130,7 @@ const userLogin = async function (req, res) {
     // token generation
     let token = jwt.sign(
       {
-        loginId: loginUser._id.toString(),
+        userId: loginUser._id.toString(),
         userStatus: "active",
         iat: Date.now()  //issueAt
       },
