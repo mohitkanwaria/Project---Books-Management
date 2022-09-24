@@ -52,39 +52,13 @@ const createReview = async function(req, res){
 }
 
 
-//==============================delete review========================================
-let deleteReview = async function (req,res){
-    try{
-        const reviewId =req.params.reviewId
-        const bookId =req.params.bookId
-
-        //first updating review isDeleted to true
-        const reviewDelete = await reviewModel.findOneAndUpdate({_id: reviewId, isDeleted:false},{$set:{isDeleted:true}},{ new: true })
-
-         //checking reviewDelete is present and isdeleted :true
-        if(reviewDelete){
-
-        //updating reviews count in bookmodel(decreasing count by 1) and set isDeleted to true
-        const updateBookDetails = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted:false},{ $inc: { reviews: -1 } },{ new: true })
-        return res.status(200).send({ status: true, message: "The review is deleted" });
-        }
-
-        //if review not found or deleted
-        return res.status(404).send({status: false, message: "Review not found or Deleted"});
-
-
-}catch(error) {
-        return res.status(500).send({ message: error.message })
-    }
-}
-
 /* ### PUT /books/:bookId/review/:reviewId
 - Update the review - review, rating, reviewedBy.
 - Check if the bookId exists and is not deleted before updating the review. Check if the review exist before updating the review. Send an error response with appropirate status code like [this](#error-response-structure) if the book does not exist
 - Get review details like review, rating, reviewer's name in request body.
 - Return the updated book document with reviews data on successful operation. The response body should be in the form of JSON object like [this](#book-details-response)
 */
-
+//===========================================update review ==================================================
  const updateReview = async function(req, res){
         try {
             //getting the bookId
@@ -168,6 +142,34 @@ let deleteReview = async function (req,res){
             })
         }
  }
+
+ //=========================================delete review========================================
+let deleteReview = async function (req,res){
+    try{
+        const reviewId =req.params.reviewId
+        const bookId =req.params.bookId
+
+        //first updating review isDeleted to true
+        const reviewDelete = await reviewModel.findOneAndUpdate({_id: reviewId, isDeleted:false},{$set:{isDeleted:true}},{ new: true })
+
+         //checking reviewDelete is present and isdeleted :true
+        if(reviewDelete){
+
+        //updating reviews count in bookmodel(decreasing count by 1) and set isDeleted to true
+        const updateBookDetails = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted:false},{ $inc: { reviews: -1 } },{ new: true })
+        return res.status(200).send({ status: true, message: "The review is deleted" });
+        }
+
+        //if review not found or deleted
+        return res.status(404).send({status: false, message: "Review not found or Deleted"});
+
+
+}catch(error) {
+        return res.status(500).send({ message: error.message })
+    }
+}
+
+
 
 module.exports.updateReview = updateReview
 module.exports.deleteReview  = deleteReview

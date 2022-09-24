@@ -3,110 +3,8 @@ const UserModel = require('../Models/UserModel')
 const validation = require('../validator/validation')
 // const bookModel = require("../Models/BooksModel")
 
-const allBooks = async function (req, res) {
-    try {
-        //if nothing is given in req.params then return all books with isDeleted : false
-        const totalBooks = await bookModel.find({
-            isDeleted: false
-        })
 
-        //returnBook contains only what we have to send in response
-        let returnBook = {
-            _id: totalBooks._id,
-            title: totalBooks.title,
-            excerpt: totalBooks.excerpt,
-            userId: totalBooks.userId,
-            category: totalBooks.category,
-            reviews: totalBooks.reviews,
-            releasedAt: totalBooks.releasedAt
-        }
-        // to filter according to query 
-        const { userId, category, subcategory } = req.query
-
-        const query = { isDeleted: false }
- 
-        //validating the userID and if valid then sending to query object
-        // if (userId != null) query.userId = userId
-        // if (!userId.match(/^[0-9a-fA-F]{24}$/))
-        // res.status(400).send({ status: false, msg: "invalid userId given" })
-
-        //checking for valid query
-        const comp =['userId', 'category', 'subcategory']
-        if (!Object.keys(req.query).every(elem => comp.includes(elem)))
-        return res.status(400).send({ status: false, msg: "wrong query given" });
-
-
-        if(userId){
-            if(!userId.match(/^[0-9a-fA-F]{24}$/)){
-               return res.status(400).send({ status: false, msg: "invalid userId given" })
-            }
-        }
-
-        if (category != null) query.category = category;
-        if (subcategory != null) query.subcategory = subcategory;
-
-
-        //check for no books
-        if (totalBooks.length === 0) {
-            res.status(404).send({
-                status: false,
-                message: "No book found"
-            })
-        } 
-        // if nothing is given in query
-        else if (Object.keys(query).length === 0) {
-            return res.status(200).send({
-                status: true,
-                data: returnBook
-            })
-        } else {
-            //filtering the book as per the query and getting the data in finalFilter
-            const finalFilter = await bookModel.find(query)
-            return res.status(200).send({ status: true, data: finalFilter })
-
-        }
-
-    } catch (error) {
-        res.status(500).send({
-            status: false,
-            message: error.message
-        })
-    }
-}
-
-
-const getByBookId = async function (req, res) {
-
-    try {
-
-        //extract the bookId 
-        const bookId = req.params.bookId
-        //find the book with the bookId in bookModel
-        const book = await bookModel.findById(bookId)
-
-        //if book not found or isDeleted is true then we can say book not found
-        if (!book || book.isDeleted === true) {
-            return res.status(404).send({
-                status: false,
-                message: "Book not found"
-            })
-        } else {
-            return res.status(200).send({
-                status: true,
-                data: book
-            })
-        }
-    } catch (error) {
-        res.status(500).send({
-            status: false,
-            message: error.message
-        })
-    }
-
-}
-
-
-
+//=========================================creating book===================================================
 const createBook = async function (req, res) {
     try {
         const data = req.body
@@ -114,10 +12,7 @@ const createBook = async function (req, res) {
 
         //-----------------------------------------------------------------------------------------
         if (!validation.isValidRequestBody(data)) {
-            return res.status(400).send({
-                status: false,
-                message: "Invalid request parameter, please provide User Details",
-            })
+            return res.status(400).send({status: false, message: "Invalid request parameter, please provide Book Details"})
         }
 
         //for unquie validation in bookModel for ISBN and Title
@@ -173,6 +68,106 @@ const createBook = async function (req, res) {
     }
 }
 
+//===============================================get all books via filters==================================
+const allBooks = async function (req, res) {
+    try {
+        //if nothing is given in req.params then return all books with isDeleted : false
+        const totalBooks = await bookModel.find({
+            isDeleted: false
+        })
+
+        //returnBook contains only what we have to send in response
+        let returnBook = {
+            _id: totalBooks._id,
+            title: totalBooks.title,
+            excerpt: totalBooks.excerpt,
+            userId: totalBooks.userId,
+            category: totalBooks.category,
+            reviews: totalBooks.reviews,
+            releasedAt: totalBooks.releasedAt
+        }
+        // to filter according to query 
+        const { userId, category, subcategory } = req.query
+
+        const query = { isDeleted: false }
+
+        //checking for valid query
+        const comp =['userId', 'category', 'subcategory']
+        if (!Object.keys(req.query).every(elem => comp.includes(elem)))
+        return res.status(400).send({ status: false, msg: "wrong query given" });
+
+
+        if(userId){
+            if(!userId.match(/^[0-9a-fA-F]{24}$/)){
+               return res.status(400).send({ status: false, msg: "invalid userId given" })
+            }
+        }
+
+        if (category != null) query.category = category;
+        if (subcategory != null) query.subcategory = subcategory;
+
+
+        //check for no books
+        if (totalBooks.length === 0) {
+            res.status(404).send({
+                status: false,
+                message: "No book found"
+            })
+        } 
+        // if nothing is given in query
+        else if (Object.keys(query).length === 0) {
+            return res.status(200).send({
+                status: true,
+                data: returnBook
+            })
+        } else {
+            //filtering the book as per the query and getting the data in finalFilter
+            const finalFilter = await bookModel.find(query)
+            return res.status(200).send({ status: true, data: finalFilter })
+
+        }
+
+    } catch (error) {
+        res.status(500).send({
+            status: false,
+            message: error.message
+        })
+    }
+}
+
+//=============================get book details by bookId============================================
+const getByBookId = async function (req, res) {
+
+    try {
+
+        //extract the bookId 
+        const bookId = req.params.bookId
+        //find the book with the bookId in bookModel
+        const book = await bookModel.findById(bookId)
+
+        //if book not found or isDeleted is true then we can say book not found
+        if (!book || book.isDeleted === true) {
+            return res.status(404).send({
+                status: false,
+                message: "Book not found"
+            })
+        } else {
+            return res.status(200).send({
+                status: true,
+                data: book
+            })
+        }
+    } catch (error) {
+        res.status(500).send({
+            status: false,
+            message: error.message
+        })
+    }
+
+}
+
+
+
 //==============================delete by BookId=============================================
 
 const deleteByBook = async function(req, res){
@@ -206,7 +201,7 @@ try{
 }
 
 
-//============updateBook=======
+//==================================updateBook==========================================================
 
 const updateBook = async function (req, res) {
 

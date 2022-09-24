@@ -7,6 +7,7 @@ const createUser = async function (req, res) {
   try {
     const user = req.body
 
+     //if entries are empty
     if (!validation.isValidRequestBody(user)) {
       return res.status(400).send({
         status: false,
@@ -14,14 +15,20 @@ const createUser = async function (req, res) {
       })
     }
 
+    //destructuring the entries
     const { title, name, phone, email, password, address } = user
+
+    //checking for only the request body enteries only 
+    const compare =['title', 'name', 'phone', 'email', 'password', 'address']
+    if (!Object.keys(user).every(elem => compare.includes(elem)))
+    return res.status(400).send({ status: false, msg: "wrong entries given" });
 
     //checking uniqueness for email and phone in usermodel
     const checkUser =  await userModel.findOne({$or:[{phone:phone, isDeleted: false},{email:email,isDeleted: false}]});
     if(checkUser)
     return res.status(400).send({status:false, message:'email id and phone number already present in database try different one!'})
 
-    //if entries are empty
+   //validation for title
     if (!validation.isValidTitle(title)) {
       return res
         .status(400)
@@ -82,7 +89,7 @@ const createUser = async function (req, res) {
 
     }
 
-
+    //creating user data
     const createNew = await userModel.create(user)
     res.status(201).send({ status: true, message: 'Success', data: createNew })
 
@@ -96,33 +103,31 @@ const userLogin = async function (req, res) {
   try {
     const user = req.body
 
+    //if entries are empty
     if (!validation.isValidRequestBody(user)) {
-      return res.status(400).send({
-        status: false,
-        message: "Invalid request parameter, please provide User Details",
-      })
+      return res.status(400).send({status: false, message: "Invalid request parameter, please provide User Details"})
     }
 
     const email = user.email
     const password = user.password
 
+    //validation for email and password
     if (!validation.isValidEmail(email)) {
-      return res.status(400).send({
-        status: false,
-        message: "email is required."
-      });
+      return res.status(400).send({status: false, message: "email is required."})
     }
 
     if (!validation.isValidPassword(password)) {
-      return res.status(400).send({status: false, message: "provide valid password"});
+      return res.status(400).send({status: false, message: "provide valid password"})
     }
-    //validation for userLogin
-    const loginUser = await userModel.findOne({ email: email, password: password })
 
+    const loginUser = await userModel.findOne({ email: email, password: password })
+    
+    //validation for userLogin
     if (!loginUser) {
     return res.status(400).send({ status: false, msg: "User Details Invalid" })
     }
 
+    // token generation
     let token = jwt.sign(
       {
         loginId: loginUser._id.toString(),
@@ -131,7 +136,9 @@ const userLogin = async function (req, res) {
       },
       "BookManagementProject3",
       { expiresIn: "24h" }
-    );
+    )
+
+    //created object for the response
     let jwtToken = { token: token, userId: loginUser._id, iat: Date.now(), exp: new Date(Date.now()) }
 
     res.setHeader('token-key', token)
