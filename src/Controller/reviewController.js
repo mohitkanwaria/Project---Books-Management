@@ -42,11 +42,12 @@ const createReview = async function(req, res){
         return res.status(200).send({ status: true, message: "Book not found or book is already deleted" });
 
         //taking all newreview
-        updatebookReview.reviewsdata = newreview;
+        // let updatedData={bookData:updatebookReview, reviewsData:newreview}
+        updatebookReview.reviewsData = newreview
 
-        return res.status(200).send({ status: true, message: "Success", data: updatebookReview })
+        return res.status(200).send({ status: true, message: "Success", data: updatebookReview})
    
-}catch(err){
+    }catch(err){
     return res.status(500).send({status:false, message:err.message})
 }
 }
@@ -150,13 +151,13 @@ let deleteReview = async function (req,res){
         const bookId =req.params.bookId
 
         //first updating review isDeleted to true
-        const reviewDelete = await reviewModel.findOneAndUpdate({_id: reviewId, isDeleted:false},{$set:{isDeleted:true}},{ new: true })
+        const reviewDelete = await reviewModel.findOneAndUpdate({_id: reviewId, isDeleted:false, bookId:bookId},{$set:{isDeleted:true}},{ new: true })
 
          //checking reviewDelete is present and isdeleted :true
         if(reviewDelete){
 
         //updating reviews count in bookmodel(decreasing count by 1) and set isDeleted to true
-        const updateBookDetails = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted:false},{ $inc: { reviews: -1 } },{ new: true })
+        const updateBookDetails = await bookModel.findOneAndUpdate({ _id:bookId, isDeleted:false},{ $inc: { reviews: -1 } },{ new: true })
         return res.status(200).send({ status: true, message: "The review is deleted" });
         }
 
