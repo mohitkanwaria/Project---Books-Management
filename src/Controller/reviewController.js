@@ -6,8 +6,8 @@ const validation = require("../validator/validation")
 //==================================================create review=======================================
 const createReview = async function(req, res){
  try{   
-        let data = req.body
-        let bookId = req.params.bookId
+        const data = req.body
+        const bookId = req.params.bookId
 
         //if entries are empty
         if (!validation.isValidRequestBody(data)) 
@@ -39,7 +39,7 @@ const createReview = async function(req, res){
 
         //if isDeleted is true
         if (!updatebookReview)
-        res.status(200).send({ status: true, message: "Book not found or book is already deleted" });
+        return res.status(200).send({ status: true, message: "Book not found or book is already deleted" });
 
         //taking all newreview
         updatebookReview.reviewsdata = newreview;
@@ -55,8 +55,8 @@ const createReview = async function(req, res){
 //==============================delete review========================================
 let deleteReview = async function (req,res){
     try{
-        let reviewId =req.params.reviewId
-        let bookId =req.params.bookId
+        const reviewId =req.params.reviewId
+        const bookId =req.params.bookId
 
         const bookDetails = await bookModel.findOneAndUpdate({ _id: bookId },{ $inc: { reviews: -1 } },{ new: true })
 
@@ -119,7 +119,7 @@ let deleteReview = async function (req,res){
             const reviewData = await reviewModel.findOne({_id : reviewId})
 
             //taking update details in request.body
-            let updateDetails = req.body
+            const updateDetails = req.body
 
             //checking for empty updateDetails
             if(!validation.isValidRequestBody(updateDetails)){
@@ -132,9 +132,9 @@ let deleteReview = async function (req,res){
             const { review, rating, reviewedBy } = updateDetails
 
             //filtering as per the request body
-            let filterUpdate = { isDeleted: false }
+            const filterUpdate = { isDeleted: false }
 
-            let compare  = ['review', 'rating', 'reviewedBy']
+            const compare  = ['review', 'rating', 'reviewedBy']
 
             //checking for only the request body enteries only 
             if (!Object.keys(updateDetails).every(elem => compare.includes(elem))){

@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 //===============createuser========
 const createUser = async function (req, res) {
   try {
-    let user = req.body
+    const user = req.body
 
     if (!validation.isValidRequestBody(user)) {
       return res.status(400).send({
@@ -15,6 +15,9 @@ const createUser = async function (req, res) {
     }
 
     const { title, name, phone, email, password, address } = user
+
+    //checking uniqueness for email and phone in usermodel
+    const checkUser = await userModel.findOne({phone: phone, email: email})
 
     if (!validation.isValidTitle(title)) {
       return res
@@ -37,7 +40,7 @@ const createUser = async function (req, res) {
       });
     }
 
-    if (await userModel.findOne({ phone: phone }))
+    if (checkUser.phone)
       return res.status(400).send({ status: false, message: 'Phone number already present!' })
 
     //======email validation============
@@ -47,7 +50,7 @@ const createUser = async function (req, res) {
         message: "email is required."
       });
     }
-    if (await userModel.findOne({ email: email }))
+    if (checkUser.email)
       return res.status(400).send({ status: false, message: 'Email Id already present!' })
 
     //============password validation=======
@@ -83,7 +86,7 @@ const createUser = async function (req, res) {
     }
 
 
-    let createNew = await userModel.create(user)
+    const createNew = await userModel.create(user)
     res.status(201).send({ status: true, message: 'Success', data: createNew })
 
   } catch (err) {
@@ -94,7 +97,7 @@ const createUser = async function (req, res) {
 //---------------------- generation of token ----------------------------------- 
 const userLogin = async function (req, res) {
   try {
-    let user = req.body
+    const user = req.body
 
     if (!validation.isValidRequestBody(user)) {
       return res.status(400).send({
@@ -103,8 +106,8 @@ const userLogin = async function (req, res) {
       })
     }
 
-    let email = user.email
-    let password = user.password
+    const email = user.email
+    const password = user.password
 
     if (!validation.isValidEmail(email)) {
       return res.status(400).send({
@@ -113,33 +116,15 @@ const userLogin = async function (req, res) {
       });
     }
 
-
     if (!validation.isValidPassword(password)) {
-      return res.status(400).send({
-        status: false,
-        message: "provide valid password"
-      });
+      return res.status(400).send({status: false, message: "provide valid password"});
     }
-
     //validation for userLogin
-    let loginUser = await userModel.findOne({ email: email, password: password })
+    const loginUser = await userModel.findOne({ email: email, password: password })
 
     if (!loginUser) {
-
-      return res.status(400).send({ status: false, msg: "User Details Invalid" })
+    return res.status(400).send({ status: false, msg: "User Details Invalid" })
     }
-
-    // let currentDate = new Date()
-    // const nowTime = Math.floor(currentDate.getTime() / 1000)
-    // let token = jwt.sign(
-    //     {
-    //         loginId:loginUser._id.toString(),
-    //         userStatus: "active",
-    //         iat:nowTime,  //issueAt
-    //         exp:600 + nowTime
-    //     },
-    //     "BookManagementProject3"
-    // );
 
     let token = jwt.sign(
       {
@@ -153,9 +138,10 @@ const userLogin = async function (req, res) {
     let jwtToken = { token: token, userId: loginUser._id, iat: Date.now(), exp: new Date(Date.now()) }
 
     res.setHeader('token-key', token)
-    res.status(200).send({ status: true, message: "Success", data: jwtToken });
+    return res.status(200).send({ status: true, message: "Success", data: jwtToken });
+  
   } catch (err) {
-    res.status(500).send({ status: false, message: err.message })
+    return res.status(500).send({ status: false, message: err.message })
   }
 }
 

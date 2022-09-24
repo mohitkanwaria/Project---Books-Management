@@ -4,12 +4,12 @@ const bookModel = require('../Models/BooksModel')
 // Authentication
 const authentication = async (req, res, next) => {
     try {
-        let token = req.headers['x-api-key']
+        const token = req.headers['x-api-key']
         if (!token) {
             return res.status(400).send({ status: false, message: "Token hona chahiye !" })
         }
         try{
-            let decodedToken = jwt.verify(token,"BookManagementProject3"); 
+            const decodedToken = jwt.verify(token,"BookManagementProject3"); 
        
              req["x-api-key"]=decodedToken;
            }
@@ -28,10 +28,10 @@ const authentication = async (req, res, next) => {
 const authorization = async function (req, res, next)  {
     try {
         
-        let bookId=req.params.bookId
+        const bookId=req.params.bookId
         const decodedToken=req["x-api-key"]
         
-        let bookById = await bookModel.findOne({_id:bookId, isDeleted:false})
+        const bookById = await bookModel.findOne({_id:bookId, isDeleted:false})
 
         if(decodedToken.loginId !== bookById.userId.toString()){
 
