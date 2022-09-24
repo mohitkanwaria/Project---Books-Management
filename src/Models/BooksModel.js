@@ -14,7 +14,7 @@ const bookSchema = new mongoose.Schema({
   userId: {
     type: ObjectId,
     required: true,
-    refs: "User"
+    ref: "User"
   }
 
   ,

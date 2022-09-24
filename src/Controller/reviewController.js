@@ -35,7 +35,7 @@ const createReview = async function(req, res){
         const newreview = await reviewModel.create(data);
 
         //finding book and updating review
-        const updatebookReview = await bookModel.findOneAndUpdate({ _id: data.bookId,isDeleted:false}, { $inc: { reviews: +1 } }, { new: true }).lean()
+        const updatebookReview = await bookModel.findOneAndUpdate({ _id: bookId,isDeleted:false}, { $inc: { reviews: 1 } }, { new: true }).lean()
 
         //if isDeleted is true
         if (!updatebookReview)
@@ -58,17 +58,20 @@ let deleteReview = async function (req,res){
         const reviewId =req.params.reviewId
         const bookId =req.params.bookId
 
-        const bookDetails = await bookModel.findOneAndUpdate({ _id: bookId },{ $inc: { reviews: -1 } },{ new: true })
+        //first updating review isDeleted to true
+        const reviewDelete = await reviewModel.findOneAndUpdate({_id: reviewId, isDeleted:false},{$set:{isDeleted:true}},{ new: true })
 
-        const reviewDetails = await reviewModel.findOne({_id: reviewId, bookId:bookDetails._id.toString()})
-        if (!reviewDetails || reviewDetails.isDeleted===true){
+         //checking reviewDelete is present and isdeleted :true
+        if(reviewDelete){
 
-            return res.status(404).send({status: false, message: "Review not found or Deleted"});
-        }else{
-            reviewDetails.isDeleted = true;
-            reviewDetails.save();
-            return res.status(200).send({ status: true, message: "The review is deleted" });
+        //updating reviews count in bookmodel(decreasing count by 1) and set isDeleted to true
+        const updateBookDetails = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted:false},{ $inc: { reviews: -1 } },{ new: true })
+        return res.status(200).send({ status: true, message: "The review is deleted" });
         }
+
+        //if review not found or deleted
+        return res.status(404).send({status: false, message: "Review not found or Deleted"});
+
 
 }catch(error) {
         return res.status(500).send({ message: error.message })
