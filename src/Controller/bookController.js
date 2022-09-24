@@ -9,13 +9,17 @@ const validation = require('../validator/validation')
 const createBook = async function (req, res) {
     try {
         const data = req.body
-        const { title, excerpt, userId, ISBN, category, subcategory, reviews, deletedAt, isDeleted, releasedAt } = data
+        const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
         
         data.title = title.toUpperCase()
         //-----------------------------------------------------------------------------------------
         if (!validation.isValidRequestBody(data)) {
             return res.status(400).send({status: false, message: "Invalid request parameter, please provide Book Details"})
         }
+
+        const compare =['title', 'excerpt', 'userId', 'ISBN', 'category', 'subcategory','releasedAt']
+        if (!Object.keys(data).every(elem => compare.includes(elem)))
+        return res.status(400).send({ status: false, msg: "wrong entries given" });
 
         //for unquie validation in bookModel for ISBN and Title
         const checkUniqueTitleAndISBN = await bookModel.findOne(({$or:[{title : title, isDeleted: false},{ISBN : ISBN, isDeleted: false}]}))
@@ -48,11 +52,6 @@ const createBook = async function (req, res) {
             return res.status(400).send({ status: false, message: 'Excerpt is required' })
 
         //-------------------userId validation-------------------------------------------
-        if (!validation.isValid(userId))
-            return res.status(400).send({ status: false, message: 'UserId is required' })
-
-        if (!userId.match(/^[0-9a-fA-F]{24}$/))
-            return res.status(400).send({ status: false, msg: "invalid userId given" })
 
         if (!await UserModel.findById(userId))
             return res.status(400).send({ status: false, msg: "Invalid User Id !" })
@@ -154,6 +153,11 @@ const allBooks = async function (req, res) {
 
 
         let body = req.query
+
+        //apart from this entries gives error
+        const compare =['userId', 'category', 'subcategory']
+        if (!Object.keys(body).every(elem => compare.includes(elem)))
+        return res.status(400).send({ status: false, msg: "wrong entries given" });
 
         //setting the isDeleted false in body
         body.isDeleted = false
