@@ -17,8 +17,11 @@ const createUser = async function (req, res) {
     const { title, name, phone, email, password, address } = user
 
     //checking uniqueness for email and phone in usermodel
-    const checkUser = await userModel.findOne({phone: phone, email: email})
+    const checkUser =  await userModel.findOne({$or:[{phone:phone, isDeleted: false},{email:email,isDeleted: false}]});
+    if(checkUser)
+    return res.status(400).send({status:false, message:'email id and phone number already present in database try different one!'})
 
+    //if entries are empty
     if (!validation.isValidTitle(title)) {
       return res
         .status(400)
@@ -33,15 +36,12 @@ const createUser = async function (req, res) {
       });
     }
     //===========phone validation=========
-    if (!validation.isValidMobile(phone)) {
+    if (!validation.isValidMobile(phone)) 
       return res.status(400).send({
         status: false,
         message: "Phone no is required."
       });
-    }
-
-    if (checkUser.phone)
-      return res.status(400).send({ status: false, message: 'Phone number already present!' })
+    
 
     //======email validation============
     if (!validation.isValidEmail(email)) {
@@ -50,8 +50,6 @@ const createUser = async function (req, res) {
         message: "email is required."
       });
     }
-    if (checkUser.email)
-      return res.status(400).send({ status: false, message: 'Email Id already present!' })
 
     //============password validation=======
     if (!validation.isValidPassword(password)) {
@@ -62,7 +60,6 @@ const createUser = async function (req, res) {
     }
 
     //==============address validation===========
-
     if (address) {
 
       if (!validation.isValid(address.street)) {
