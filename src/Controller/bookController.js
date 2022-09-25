@@ -70,8 +70,6 @@ const createBook = async function (req, res) {
 
 
 
-        // if (checkUnique.ISBN)
-        //     return res.status(400).send({ status: false, message: 'ISBN is already present' })
 
         //--------------------------------Category Validation------------------------------------------------
         if (!validation.isValid(category))
@@ -166,8 +164,9 @@ const allBooks = async function (req, res) {
 
         // alphabetically sorting the title
         let sortedData = findbook.sort(function (a, b){
-            if(a.title < b.title) { return -1 }
-            // if(a.title > b.title) { return 1 }
+            if(a.title < b.title) {
+                 return -1 
+                }
         })
 
         return res.status(200).send({
@@ -273,23 +272,6 @@ const updateBook = async function (req, res) {
         }
 
 
-        // //checking for update details - title
-        // if (title) {
-        //     //ckeck for uniqueness of title
-        //     if (book.title) {
-        //         return res.status(400).send({
-        //             status: false,
-        //             message: "Title already exists please provide the unique title"
-        //         })
-        //     } else if (validation.isValid(title)) {
-        //         book.title = title.trim()
-        //     } else {
-        //         return res.status(400).send({
-        //             status: false,
-        //             message: "Title required"
-        //         })
-        //     }
-        // }
 
         //checking for unique title
         const uniqueTitle = await bookModel.findOne({title : title})
@@ -298,7 +280,7 @@ const updateBook = async function (req, res) {
                 status : false,
                 message : "Title is already present"
             })
-        } else { book.title = title}
+        } else { book.title = title.toUpperCase()}
         //checking for update details - excerpt
         if (excerpt) {
 
@@ -312,25 +294,7 @@ const updateBook = async function (req, res) {
             }
         }
 
-        // //checking for update details - ISBN
-        // //check for unique ISBN
-        // if (ISBN) {
-        //     if (book.ISBN) {
-        //         return res.status(400).send({
-        //             status: false,
-        //             message: "ISBN already exists please provide the unique ISBN"
-        //         })
-        //     }
-        //     else if (validation.isValidISBN(ISBN)) {
-        //         book.ISBN = ISBN
-        //     } else {
-        //         return res.status(400).send({
-        //             status: false,
-        //             message: "ISBN required"
-        //         })
-        //     }
-        // }
-
+        
         //check for unique ISBN
 
         const uniqueISBN = await bookModel.findOne({ISBN : ISBN})
@@ -353,13 +317,6 @@ const updateBook = async function (req, res) {
         return res.status(500).send({ message: error.message })
     }
 }
-
-
-
-
-
-
-
 
 
 module.exports.updateBook = updateBook
