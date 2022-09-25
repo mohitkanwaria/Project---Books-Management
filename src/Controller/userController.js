@@ -39,7 +39,7 @@ const createUser = async function (req, res) {
       return res.status(400).send({
         status: false,
         message:
-          "First name is required."
+          "name is required."
       });
     }
     //===========phone validation=========

@@ -131,16 +131,19 @@ const createReview = async function(req, res){
         if(rating != null) filterUpdate.rating = rating;
         if(reviewedBy != null) filterUpdate.reviewedBy = reviewedBy;
 
-        filterUpdate.reviewData=reviewData
+        filterUpdate.reviewData=reviewData.toObject()
 
         //updating the filterUpdate in the reviewModel and sending finalUpdate in response
-        const finalUpdate = await reviewModel.findOneAndUpdate({_id : reviewId}, filterUpdate, {new : true})
+        const finalUpdate = await reviewModel.findOneAndUpdate({_id : reviewId,bookId:bookId}, filterUpdate, {new : true})
+        if(finalUpdate)
         res.status(200).send({
             status : true,
             message : "Successfully updated",
             data : finalUpdate
         })
-   
+        return res.status(400).send({status:false, message:'Unable update with different book with different review'})
+        
+
         } catch (error) {
             return res.status(500).send({
                 status : false,
