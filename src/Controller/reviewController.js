@@ -20,7 +20,7 @@ const createReview = async function(req, res){
         if (!data.reviewedAt) data.reviewedAt = new Date;
 
         //apart from this entries gives error
-        const compare =['reviewedBy', 'reviewedAt', 'rating', 'review']
+        const compare =['reviewedBy', 'reviewedAt', 'rating', 'review','bookId']
         if (!Object.keys(data).every(elem => compare.includes(elem)))
         return res.status(400).send({ status: false, msg: "wrong entries given" });
 
