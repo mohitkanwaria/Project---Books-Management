@@ -11,7 +11,7 @@ const createBook = async function (req, res) {
         const data = req.body
         const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
         
-        data.title = title.toUpperCase()
+        
         //-----------------------------------------------------------------------------------------
         if (!validation.isValidRequestBody(data)) {
             return res.status(400).send({status: false, message: "Invalid request parameter, please provide Book Details"})
@@ -21,19 +21,10 @@ const createBook = async function (req, res) {
         if (!Object.keys(data).every(elem => compare.includes(elem)))
         return res.status(400).send({ status: false, msg: "wrong entries given" });
 
-        //for unquie validation in bookModel for ISBN and Title
-        const checkUniqueTitleAndISBN = await bookModel.findOne(({$or:[{title : title, isDeleted: false},{ISBN : ISBN, isDeleted: false}]}))
-
-        //checking for unique title 
-        if(checkUniqueTitleAndISBN){
-            return res.status(400).send({
-                status : false,
-                message : "Title is already present please provide unique title"
-            
-            })
-        } 
-        
+       
         //----------------------------Title Validation-----------------------------------------------------
+         data.title = title.toUpperCase()
+        
         if(!/^[a-zA-Z_]+( [a-zA-Z_]+)*$/.test(title)){
             return res.status(400).send({
                 status : false,
@@ -42,14 +33,35 @@ const createBook = async function (req, res) {
             })
         }
 
+
       //------------------------ISBN validation-------------------------------------------
         if (!validation.isValid(ISBN))
             return res.status(400).send({ status: false, message: 'ISBN is required' })
         
+        if (!validation.isValidISBN(ISBN))
+            return res.status(400).send({ status: false, message: 'ISBN should be unique number [XXX-XXXXXXXXXX] !' })
+
+
+         //for unquie validation in bookModel for ISBN and Title
+         const checkUniqueTitleAndISBN = await bookModel.findOne(({$or:[{title : title, isDeleted: false},{ISBN : ISBN, isDeleted: false}]}))
+
+         //checking for unique title 
+         if(checkUniqueTitleAndISBN){
+             return res.status(400).send({
+                 status : false,
+                 message : "Title and ISBN is already present please provide unique Title and ISBN"
+             
+             })
+         } 
+         
 
         //---------------------------excerpt validation-------------------------------
         if (!validation.isValid(excerpt))
             return res.status(400).send({ status: false, message: 'Excerpt is required' })
+
+        if(!/^[a-zA-Z_]+( [a-zA-Z_]+)*$/.test(excerpt)){
+            return res.status(400).send({status : false, message : "excerpt should be string"})
+            }
 
         //-------------------userId validation-------------------------------------------
 
@@ -57,8 +69,6 @@ const createBook = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Invalid User Id !" })
 
 
-        if (!validation.isValidISBN(ISBN))
-            return res.status(400).send({ status: false, message: 'Invalid ISBN !' })
 
         // if (checkUnique.ISBN)
         //     return res.status(400).send({ status: false, message: 'ISBN is already present' })
@@ -66,16 +76,28 @@ const createBook = async function (req, res) {
         //--------------------------------Category Validation------------------------------------------------
         if (!validation.isValid(category))
             return res.status(400).send({ status: false, message: 'Category is required' })
+        
+        if(!/^[a-zA-Z_]+( [a-zA-Z_]+)*$/.test(category)){
+            return res.status(400).send({status : false, message : "category should be string"})
+                }
 
         //--------------------------------SubCategory Validation------------------------------------------------
         if (!validation.isValid(subcategory))
             return res.status(400).send({ status: false, message: 'Subcategory is required' })
 
+        if(!/^[a-zA-Z_]+( [a-zA-Z_]+)*$/.test(subcategory)){
+                return res.status(400).send({status : false, message : "subcategory should be string"})
+                    }
+
         //----------------------------------releasedAt Validation-------------------------------------------
         if (!validation.isValid(releasedAt))
             return res.status(400).send({ status: false, message: 'ReleaseAt is required' })
 
+        if (!/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/.test(releasedAt))
+            return res.status(400).send({ status: false, message: 'Please provide valid date format YYYY-MM-DD !' })
+
         //-----------------------------------BOOK Creation------------------------------------
+       
         const bookCreate = await bookModel.create(data)
         return res.status(201).send({ status: true, message: 'Successfully book created', data: bookCreate })
     
@@ -87,68 +109,7 @@ const createBook = async function (req, res) {
 //===============================================get all books via filters==================================
 const allBooks = async function (req, res) {
     try {
-        // //if nothing is given in req.params then return all books with isDeleted : false
-        // const totalBooks = await bookModel.find({
-        //     isDeleted: false
-        // })
-
         
-        // //returnBook contains only what we have to send in response
-        // let returnBook = {
-        //     _id: totalBooks._id,
-        //     title: totalBooks.title,
-        //     excerpt: totalBooks.excerpt,
-        //     userId: totalBooks.userId,
-        //     category: totalBooks.category,
-        //     reviews: totalBooks.reviews,
-        //     releasedAt: totalBooks.releasedAt
-        // }
-        // //alphabetically sorting the title
-        // let sortedData = totalBooks.sort(function (a, b){
-        //     if(a.title < b.title) { return -1 }
-        //     if(a.title > b.title) { return 1 }
-        //     return 0
-        // })
-        // // to filter according to query 
-        // const { userId, category, subcategory } = req.query
-
-        // const query = { isDeleted: false }
-
-        // //checking for valid query
-        // const comp =['userId', 'category', 'subcategory']
-        // if (!Object.keys(req.query).every(elem => comp.includes(elem)))
-        // return res.status(400).send({ status: false, msg: "wrong query given" });
-
-
-        // if(userId){
-        //     if(!userId.match(/^[0-9a-fA-F]{24}$/)){
-        //        return res.status(400).send({ status: false, msg: "invalid userId given" })
-        //     }
-        // }
-
-        // if (category != null) query.category = category;
-        // if (subcategory != null) query.subcategory = subcategory;
-
-
-        // //check for no books
-        // if (totalBooks.length === 0) {
-        //     res.status(404).send({
-        //         status: false,
-        //         message: "No book found"
-        //     })
-        // } 
-        // // if nothing is given in query
-        // else if (Object.keys(query).length === 0) {
-        //     return res.status(200).send({
-        //         status: true,
-        //         data: sortedData
-        //     })
-        // } else {
-        //     //filtering the book as per the query and getting the data in finalFilter
-        //     const finalFilter = await bookModel.find(query)
-        //     return res.status(200).send({ status: true, data: finalFilter })
-
-        // }
         //===========================check this to get all bokks
 
 
@@ -160,10 +121,35 @@ const allBooks = async function (req, res) {
         return res.status(400).send({ status: false, msg: "wrong entries given" });
 
         //setting the isDeleted false in body
-        body.isDeleted = false
+
+        let obj = { isDeleted: false }
+
+        //checking for userId
+        if (body.userId) {
+            if (!/^[0-9a-fA-F]{24}$/.test(body.userId)) {
+                return res.status(400).send({ status: false, message: "Invalid userId" })
+            }
+            obj.userId = body.userId
+        }
+
+        //checking for category
+        if (body.category||body.category==0) {
+            if(body.category.trim().length==0){
+                return res.status(400).send({ status: false, message: " Please give any value in Category Param" }) 
+            }
+            obj.category = body.category
+        }
+
+        ////checking for subcategory
+        if (body.subcategory||body.subcategory==0) {
+            if(body.subcategory.trim().length==0){
+                return res.status(400).send({ status: false, message: " Please give any value in Subcategory Param" })     
+            }
+            obj.subcategory = body.subcategory
+        }
 
         //finding the book as per the book_id, title, excerpt, userId, category, reviews, releadedAt
-        let findbook = await bookModel.find(body).select({
+        let findbook = await bookModel.find(obj).select({
             ISBN : 0,
             subcategory : 0,
             isDeleted : 0,
