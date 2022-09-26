@@ -94,7 +94,7 @@ const createReview = async function(req, res){
                 })
             } 
             //checking for the reviewData
-            const reviewData = await reviewModel.findOne({_id : reviewId})
+            const reviewData = await reviewModel.find({_id : reviewId})
 
             //taking update details in request.body
             const updateDetails = req.body
@@ -126,12 +126,13 @@ const createReview = async function(req, res){
         if(rating != null) filterUpdate.rating = rating;
         if(reviewedBy != null) filterUpdate.reviewedBy = reviewedBy;
 
-        filterUpdate.reviewData=reviewData.toObject()
+        
+        filterUpdate.reviewData=reviewData
 
         //updating the filterUpdate in the reviewModel and sending finalUpdate in response
-        const finalUpdate = await reviewModel.findOneAndUpdate({_id : reviewId,bookId:bookId}, filterUpdate, {new : true})
+        const finalUpdate = await reviewModel.findOneAndUpdate({_id : reviewId,bookId:bookId}, filterUpdate, {new : true}).populate("bookId")
         if(finalUpdate)
-        res.status(200).send({
+        return res.status(200).send({
             status : true,
             message : "Successfully updated",
             data : finalUpdate
