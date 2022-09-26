@@ -125,16 +125,15 @@ const createReview = async function(req, res){
         if(review != null) filterUpdate.review = review
         if(rating != null) filterUpdate.rating = rating;
         if(reviewedBy != null) filterUpdate.reviewedBy = reviewedBy;
-
-        filterUpdate.reviewsData=reviewData
-
+        
+        
         //updating the filterUpdate in the reviewModel and sending finalUpdate in response
-        const finalUpdate = await reviewModel.findOneAndUpdate({_id : reviewId,bookId:bookId}, filterUpdate, {new : true})
+        const finalUpdate = await (await reviewModel.findOneAndUpdate({_id : reviewId,bookId:bookId}, filterUpdate, {new : true}))
+        
+        //toObject() is returning plane object and adding reviewsData key to result
+        const result = book.toObject()
+        result.reviewsData = finalUpdate
 
-        let result = {
-            data : finalUpdate,
-            reviewsData : filterUpdate.reviewsData
-        }
         if(finalUpdate) 
          return res.status(200).send({
             status : true,
