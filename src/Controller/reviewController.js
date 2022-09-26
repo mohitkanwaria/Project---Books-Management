@@ -94,7 +94,7 @@ const createReview = async function(req, res){
                 })
             } 
             //checking for the reviewData
-            const reviewData = await reviewModel.findOne({_id : reviewId})
+            const reviewData = await reviewModel.find({_id : reviewId})
 
             //taking update details in request.body
             const updateDetails = req.body
@@ -133,7 +133,7 @@ const createReview = async function(req, res){
 
         let result = {
             data : finalUpdate,
-            reviewsData : [filterUpdate.reviewsData]
+            reviewsData : filterUpdate.reviewsData
         }
         if(finalUpdate) 
          return res.status(200).send({
