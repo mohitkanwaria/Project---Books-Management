@@ -171,6 +171,7 @@ const allBooks = async function (req, res) {
 
         return res.status(200).send({
             status : true,
+            message:'',
             data : sortedData
         })
     } catch (error) {
@@ -204,6 +205,7 @@ const getByBookId = async function (req, res) {
             book.reviewsData = reviewData
             return res.status(200).send({
                 status: true,
+                message:'',
                 data: book
             })
         }
@@ -280,8 +282,9 @@ const updateBook = async function (req, res) {
                 status : false,
                 message : "Title is already present"
             })
-        } else { book.title = title.toUpperCase()}
-        //checking for update details - excerpt
+        }  
+        book.title = title
+        //checking for update details - excerpt  
         if (excerpt) {
 
             if (validation.isValid(excerpt)) {

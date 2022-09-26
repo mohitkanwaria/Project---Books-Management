@@ -9,6 +9,11 @@ const isValidTitle = function (title) {
   return ["Mr", "Mrs", "Miss"].includes(title);
 };
 
+const isExcerpt = function (value) {
+  if (typeof value === "string" && value.trim().length > 0) return true;
+  return false;
+};
+
 const isValidRequestBody = function (requestBody) {
   return Object.keys(requestBody).length > 0;
 };
@@ -50,5 +55,6 @@ module.exports = {
   regixValidator,
   isValidPincode,
   isValidPassword,
-  isValidISBN
+  isValidISBN,
+  isExcerpt 
 }
