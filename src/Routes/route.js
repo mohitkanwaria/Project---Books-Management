@@ -39,6 +39,9 @@ router.put('/books/:bookId/review/:reviewId', reviewController.updateReview)
 //updating particular review for particular book
 router.delete('/books/:bookId/review/:reviewId',reviewController.deleteReview)
 
+//Aws route
+router.post("/write-file-aws", bookController.awsFileUploader)
+
 //--------------------------handling for api routes-------------------------------------
 router.all("/**", (req, res) => {
     try{

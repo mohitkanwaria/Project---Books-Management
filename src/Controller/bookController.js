@@ -2,10 +2,71 @@ const bookModel = require('../Models/BooksModel')
 const UserModel = require('../Models/UserModel')
 const reviewModel = require('../Models/ReviewModel')
 const validation = require('../validator/validation')
+const aws = require('aws-sdk')
+
+
+//AWS S3
+
+const awsFileUploader = async function(req, res){
+   
+    //AWS configuration
+  try{  aws.config.update({
+        accessKeyId: "AKIAY3L35MCRZNIRGT6N",
+        secretAccessKeyId: "9f+YFBVcSjZWM6DG9R4TUN8k8TGe4X+lXmO4jPiU",
+        region: "ap-south-1"
+    })
+
+    //File upload function
+    let uploadFile= async ( file) =>{
+        return new Promise( function(resolve, reject) {
+         // this function will upload file to aws and return the link
+         let s3= new aws.S3({apiVersion: '2006-03-01'}); // we will be using the s3 service of aws
+     
+         var uploadParams= {
+             ACL: "public-read",
+             Bucket: "classroom-training-bucket",  //HERE
+             Key: "abc/" + file.originalname, //HERE 
+             Body: file.buffer
+         }
+     
+     
+         s3.upload( uploadParams, function (err, data ){
+             if(err) {
+                 return reject({"error": err})
+             }
+             console.log(data)
+             console.log("file uploaded succesfully")
+             return resolve(data.Location)
+         })
+     
+         // let data= await s3.upload( uploadParams)
+         // if( data) return data.Location
+         // else return "there is an error"
+     
+        })
+    }
+
+        let files= req.files
+        if(files && files.length>0){
+            //upload to s3 and get the uploaded link
+            // res.send the link back to frontend/postman
+            let uploadedFileURL= await uploadFile( files[0] )
+            res.status(201).send({msg: "file uploaded succesfully", data: uploadedFileURL})
+        }
+        else{
+            res.status(400).send({ msg: "No file found" })
+        }
+        }catch(err){
+            return res.status(500).send({status:false, message:err.message})
+        }
+    }
+     
 
 
 
 //=========================================creating book===================================================
+
+
 const createBook = async function (req, res) {
     try {
         const data = req.body
@@ -17,7 +78,7 @@ const createBook = async function (req, res) {
             return res.status(400).send({status: false, message: "Invalid request parameter, please provide Book Details"})
         }
 
-        const compare =['title', 'excerpt', 'userId', 'ISBN', 'category', 'subcategory','releasedAt']
+        const compare =['title', 'excerpt', 'userId', 'ISBN', 'category', 'subcategory','releasedAt','bookCover']
         if (!Object.keys(data).every(elem => compare.includes(elem)))
         return res.status(400).send({ status: false, msg: "wrong entries given" });
 
@@ -327,3 +388,4 @@ module.exports.createBook = createBook
 module.exports.allBooks = allBooks
 module.exports.getByBookId = getByBookId
 module.exports.deleteByBook = deleteByBook
+module.exports.awsFileUploader = awsFileUploader
