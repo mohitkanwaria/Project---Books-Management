@@ -1,7 +1,5 @@
 # Project---Books-Management
 
-# Plutonium
-
 ## Project - Books Management
 
 ### Key points
